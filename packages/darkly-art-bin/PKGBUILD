@@ -7,6 +7,7 @@ pkgdesc="Forbidden Editor for Artists"
 arch=("x86_64")
 url="https://github.com/darkly-art/darkly"
 license=("AGPL-3.0-or-later")
+options=("!strip" "!debug")
 depends=(
   "glibc" "libgcc"
   "gtk3" "glib2" "pango" "cairo" "at-spi2-core"
@@ -34,16 +35,20 @@ source=("${pkgname}-v${pkgver}.deb::https://github.com/darkly-art/darkly/release
 sha256sums=("c74ec6621ed3e6323c5c9d7fc0b612f58d46e336af0a9dde200b0e9255f90c87")
 
 prepare() {
-  pushd "${srcdir}"
-    mkdir "pkg"
-    bsdtar -xf "data.tar.zst" -C "pkg"
-    pushd "pkg"
+  pushd "${srcdir}" >/dev/null
+    mkdir "root"
+    bsdtar -xf data.tar.* -C "root"
+    pushd "root" >/dev/null
       mkdir -p "opt"
       mv "usr/lib/darkly-desktop" "opt/darkly-desktop"
+      ln -sf "/opt/darkly-desktop/darkly" "usr/bin/darkly-desktop"
       rmdir "usr/lib"
       rm -r "usr/share/lintian"
-    popd
-  popd
+    popd >/dev/null
+  popd >/dev/null
 }
 
+package() {
+  cp -a "${srcdir}/root/." "${pkgdir}/"
+}
 
